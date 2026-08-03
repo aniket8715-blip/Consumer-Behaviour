@@ -227,15 +227,14 @@ Cover every empty quadrant and every detected cluster. 3-6 items total.
 """
 
 
-def call_claude(api_key, prompt):
-    import anthropic
-    client = anthropic.Anthropic(api_key=api_key)
-    response = client.messages.create(
-        model="claude-sonnet-5",
-        max_tokens=2000,
-        messages=[{"role": "user", "content": prompt}],
+def call_gemini(api_key, prompt):
+    from google import genai
+    client = genai.Client(api_key=api_key)
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=prompt,
     )
-    text = "".join(block.text for block in response.content if block.type == "text")
+    text = response.text
     text = re.sub(r"^```json|```$", "", text.strip(), flags=re.MULTILINE).strip()
     return json.loads(text)
 
@@ -338,8 +337,8 @@ if df is not None:
 
         st.divider()
         st.subheader("Strategic brief")
-        st.caption("Requires your own free Anthropic API key (console.anthropic.com). Used only for this session, never stored.")
-        api_key = st.text_input("Anthropic API key", type="password")
+        st.caption("Requires your own free Google API key (aistudio.google.com/apikey). Used only for this session, never stored.")
+        api_key = st.text_input("Google API key", type="password")
 
         if st.button("Generate brief", disabled=not api_key, type="primary"):
             prompt = AGENT_PROMPT.format(
@@ -348,7 +347,7 @@ if df is not None:
             )
             with st.spinner("Running gap, behavior, and strategy agents..."):
                 try:
-                    result = call_claude(api_key, prompt)
+                    result = call_gemini(api_key, prompt)
                     st.session_state["brief"] = result
                 except Exception as e:
                     st.error(f"Couldn't parse the response - try again. ({e})")
