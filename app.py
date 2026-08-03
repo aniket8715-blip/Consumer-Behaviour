@@ -231,7 +231,7 @@ def call_gemini(api_key, prompt):
     from google import genai
     client = genai.Client(api_key=api_key)
     response = client.models.generate_content(
-        model="gemini-2.5-flash",
+        model="gemini-3.6-flash",
         contents=prompt,
     )
     text = response.text
